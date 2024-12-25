@@ -4,13 +4,20 @@ import {RouterProvider} from "react-router-dom";
 import { router } from './routes';
 import {Provider} from  "react-redux";
 import { store } from './store';
+import { fetchUsers } from './reducers/userSlice';
 
 
-
+const main = () => {
+  //Fetch all users from api
+  store.dispatch(fetchUsers());
+  
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
        <RouterProvider router={router} />
     </Provider>
-  </StrictMode>,
+  </StrictMode>
 )
+};
+
+main();
