@@ -42,3 +42,5 @@ export const fetchBlogs = createAsyncThunk("blogs/fetchBlogs", async () => {
 dispatch(fetchBlogs); //returns 'blogs/fetchBlogs/pending' action
 //if promise is resolved return 'blogs/fetchBlogs/fulfilled' action
 //if promise is rejected return 'blogs/fetchBlogs/rejected' action
+
+//extraReducer

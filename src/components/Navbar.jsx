@@ -7,8 +7,10 @@ const Navbar = () => {
                 <h1>وبلاگ ریداکسی</h1>
 
                 <div className="navContent">
-                    <div className="navLinks"></div>
+                    <div className="navLinks">
                     <Link to={"/"}>وبلاگ</Link>
+                    <Link to={"/users"}>نویسندگان</Link>
+                    </div>
                 </div>
             </section>
         </nav>

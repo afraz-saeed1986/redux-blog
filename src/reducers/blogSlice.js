@@ -1,38 +1,31 @@
-import {createSlice, nanoid} from "@reduxjs/toolkit";
-import {sub} from "date-fns-jalali";
+import {createSlice, nanoid, createAsyncThunk, current} from "@reduxjs/toolkit";
+import { createBlog, deleteBlog, getAllBlogs, updateBlog } from "../services/blogsServices";
 
 const initialState = {
-    blogs:[
-    {
-        id: nanoid(),
-        date: sub(new Date(), {days: 2, minutes: 10}).toISOString(),
-        title: "پست اول",
-        content: "محتوای اولین پست",
-        user: "1",
-        reactions: {
-            thumbsUp: 0,
-            hooray: 0,
-            heart: 0,
-            rocket: 0,
-            eyes: 0,
-        }
-    },
-    {
-        id: nanoid(),
-        date: sub(new Date(), {minutes: 5}).toISOString(),
-        title: "پست دوم",
-        content: "محتوای دومین پست",
-        user: "3",
-        reactions: {
-            thumbsUp: 0,
-            hooray: 0,
-            heart: 0,
-            rocket: 0,
-            eyes: 0,
-        }
-    },
- ],
+    blogs:[],
+    status: "idle",
+    error: null,
 };
+
+export const fetchBlogs = createAsyncThunk("/blogs/fetchBlogs", async () => {
+    const response = await getAllBlogs();
+    return response.data;
+});
+
+export const updateApiBlog = createAsyncThunk("/blogs/updateApiBlog", async initialBlog => {
+    const response = await updateBlog(initialBlog, initialBlog.id);
+    return response.data;
+})
+
+export const deleteApiBlog = createAsyncThunk("/blogs/deleteApiBlog", async initialBlogId => {
+    await deleteBlog(initialBlogId);
+    return initialBlogId;
+});
+
+export const addNewBlog = createAsyncThunk("/blogs/addNewBlog", async initialBlog =>{
+    const response = await createBlog(initialBlog);
+    return response.data;
+});
 
 const blogsSlice = createSlice({
     name: "blogs",
@@ -50,7 +43,14 @@ const blogsSlice = createSlice({
                         date: new Date().toISOString(),
                         title,
                         content,
-                        user: userId
+                        user: userId,
+                        reactions: {
+                            thumbsUp: 0,
+                            hooray: 0,
+                            heart: 0,
+                            rocket: 0,
+                            eyes: 0,
+                        },
                 },
             };
         },
@@ -67,6 +67,8 @@ const blogsSlice = createSlice({
         blogDeleted: (state, action) => {
             const {id} = action.payload;
             state.blogs = state.blogs.filter(blog => blog.id !== id);
+            console.log(current(state));
+            console.log(state.blogs);
         },
         reactionAdded: (state, action) => {
             const {blogId, reaction} = action.payload;
@@ -75,6 +77,31 @@ const blogsSlice = createSlice({
                 existingBlog.reactions[reaction]++;
             }
         }
+ },
+ extraReducers: builder => {
+    builder
+        .addCase(fetchBlogs.pending, (state, action) => {
+            state.status = "loading";
+        })
+        .addCase(fetchBlogs.fulfilled, (state,action) => {
+            state.status = "completed";
+            state.blogs = action.payload;
+        })
+        .addCase(fetchBlogs.rejected, (state, action) => {
+            state.status = "failed";
+            state.error = action.error.message;
+        })
+        .addCase(addNewBlog.fulfilled, (state, action) => {
+            state.blogs.push(action.payload);
+        })
+        .addCase(deleteApiBlog.fulfilled, (state, action) => {
+           state.blogs = state.blogs.filter(blog => blog.id !== action.payload);
+        })
+        .addCase(updateApiBlog.fulfilled, (state, action) => {
+            const {id} = action.payload;
+            const updatedBlogIndex = state.blogs.findIndex(blog => blog.id === id);
+            state.blogs[updatedBlogIndex] = action.payload;
+        })
  }
 });
 
