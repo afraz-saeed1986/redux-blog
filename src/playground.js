@@ -44,3 +44,25 @@ dispatch(fetchBlogs); //returns 'blogs/fetchBlogs/pending' action
 //if promise is rejected return 'blogs/fetchBlogs/rejected' action
 
 //extraReducer
+
+//createSelector
+//Reselect Library
+
+
+//Normalized State
+{
+    users: {
+        id: ["user1", "user2", "user3"],
+        entities: {
+            "user1": {id: "user1", firstName: "Younes"},
+            "user2": {id: "user2", firstName: "Younes"},
+            "user3": {id: "user3", firstName: "Younes"},
+        }
+    }
+}
+
+const userId = "user2";
+const userObject = state.users.entities[userId];
+
+//createEntityAdaptor({options})
+{ids: [], entities: {}}

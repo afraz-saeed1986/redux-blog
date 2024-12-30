@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import {useEffect, memo} from "react";
 
 import {useSelector, useDispatch} from "react-redux";
 import {Link, useNavigate} from "react-router-dom";
@@ -8,14 +8,12 @@ import ShowAuthor from "./ShowAuthor";
 import ReactionButtons from "./ReactionButtons";
 import Spinner from "./Spinner";
 
-const Blogs = ({blogs})  => {
-    const orderedBlogs = blogs.slice().sort((a,b) => b.date.localeCompare(a.date));
+let Blog = ({blog})  => {
+   
 
     return (
         <>
-           {
-               orderedBlogs.map(blog => (
-                  <article key={blog.id} className="blog-excerpt">
+                  <article className="blog-excerpt">
                       <h3>{blog.title}</h3>
           
                       <div style={{marginTop: "10px", marginRight: "20px"}}>
@@ -31,11 +29,11 @@ const Blogs = ({blogs})  => {
                       دیدن کامل پست
                       </Link>
                   </article>
-              ))
-           }
         </>
-    )
-}
+    );
+};
+
+Blog = memo(Blog);
 
 const BlogsList = () => {
     const dispatch = useDispatch();
@@ -58,8 +56,11 @@ const BlogsList = () => {
     if(blogStatus === "loading") {
         content = <Spinner text="بارگذاری ..." />
     } else if(blogStatus === "completed") {
-        
-    content = <Blogs blogs={blogs} />
+        const orderedBlogs = blogs.slice().sort((a,b) => b.date.localeCompare(a.date));
+
+      content = orderedBlogs.map(blog => (
+        <Blog key={blog.id} blog={blog} />
+      ))
 
     } else if(blogStatus === "failed") {
         content = <div>{error}</div>
