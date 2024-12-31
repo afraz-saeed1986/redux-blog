@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addNewBlog, blogAdded } from "../reducers/blogSlice";
+import { useSelector } from "react-redux";
 import {useNavigate} from "react-router-dom";
+
+import {useAddNewBlogMutation} from "../api/apiSlice";
 import { selectAllUsers } from "../reducers/userSlice";
 import { nanoid } from "@reduxjs/toolkit";
 
@@ -9,9 +10,9 @@ const CreateBlogForm = () => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [userId, setUserId] = useState("");
-    const [requestStatus, setRequestStatus] = useState("idle");
 
-    const dispatch = useDispatch();
+    const [addNewBlog, {isLoading}] = useAddNewBlogMutation();
+
     const navigate = useNavigate();
 
     const users = useSelector(selectAllUsers);
@@ -20,13 +21,12 @@ const CreateBlogForm = () => {
     const onContentChange = (e) => setContent(e.target.value);
     const onAuthorChange = e => setUserId(e.target.value);
 
-    const canSave = [title, content, userId].every(Boolean) && requestStatus === "idle";
+    const canSave = [title, content, userId].every(Boolean) && !isLoading;
 
     const handleSubmitForm = async () => {
         if(canSave) {
            try {
-            setRequestStatus("pending");
-            await dispatch(addNewBlog({
+            await addNewBlog({
                 id: nanoid(),
                 date: new Date().toISOString(),
                 title,
@@ -39,15 +39,14 @@ const CreateBlogForm = () => {
                     rocket: 0,
                     eyes: 0,
                 }
-            }));
+            }).unwrap();
+
             setTitle("");
             setContent("");
             setUserId("");
             navigate("/");
            } catch (error) {
                console.error("Failed to save the blog", error);
-           } finally {
-            setRequestStatus("idle");
            }
         }
     }

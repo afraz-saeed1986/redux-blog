@@ -1,17 +1,22 @@
 import {useParams, Link, useNavigate} from "react-router-dom";
-import {useSelector, useDispatch} from "react-redux";
-import {selectBlogById, deleteApiBlog, blogDeleted } from "../reducers/blogSlice";
+import {useGetBlogQuery} from "../api/apiSlice";
 import ShowTime from "./ShowTime";
 import ShowAuthor from "./ShowAuthor";
 import ReactionButtons from "./ReactionButtons";
+import Spinner from "./Spinner";
 
 
 const SingleBlogPage = () => {
     const {blogId} = useParams();
-    const blog = useSelector((state) => selectBlogById(state, blogId));
+
+    const {
+        data: blog,
+        isFetching,
+        isSuccess
+    } = useGetBlogQuery(blogId);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+
 
     if(!blog) {
         return (
@@ -21,16 +26,11 @@ const SingleBlogPage = () => {
         )
     }
 
-    const handleDelete = () => {
-        if(blog){
-            dispatch(deleteApiBlog(blog.id));
-            // dispatch(blogDeleted({id: blog.id}));
-            navigate("/");
-        }
-    }
-
-    return (
-        <section>
+    let content;
+    if(isFetching){
+        content = <Spinner text="درحال بارگذاری ..." />
+    } else if(isSuccess) {
+        content = (
             <article className="blog">
                 <h2>{blog.title}</h2>
                 
@@ -43,8 +43,22 @@ const SingleBlogPage = () => {
 
                 <ReactionButtons blog={blog} />
                 <Link to={`/editBlog/${blog.id}`} className="button">ویرایش پست</Link>
-                <button className="muted-button" style={{marginRight: "10px"}} onClick={handleDelete}>حذف پست</button>
+                <button className="muted-button" style={{marginRight: "10px"}} >حذف پست</button>
             </article>
+        )
+    }
+
+    const handleDelete = () => {
+        if(blog){
+            // dispatch(deleteApiBlog(blog.id));
+            // dispatch(blogDeleted({id: blog.id}));
+            navigate("/");
+        }
+    }
+
+    return (
+        <section>
+            {content}
         </section>
     )
 }
