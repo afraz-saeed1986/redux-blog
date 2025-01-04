@@ -4,7 +4,7 @@ import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
 export const apiSlice = createApi({
     reducerPath: "api", //state.api
     baseQuery: fetchBaseQuery({baseUrl: "http://localhost:9000"}),
-    tagTypes: ["BLOG"],
+    tagTypes: ["BLOG", "USER"],
     endpoints: builder => ({
         getBlogs: builder.query({
             query : () => "/blogs",
@@ -33,11 +33,22 @@ export const apiSlice = createApi({
             }),
             invalidatesTags: (result, error, arg) => [{type: "BLOG", id: arg.id}]
         }),
-        getUsers: builder.query({
-            query: () => "/users",
-        }),
+        deleteBlog: builder.mutation({
+            query: blogId => ({
+                url: `/blogs/${blogId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["BLOG"]
+        })
+    
     }),
 });
 
 //{type: 'BLOG' ,id}
-export const {useGetBlogsQuery,useGetBlogQuery, useAddNewBlogMutation, useEditBlogMutation} = apiSlice;
+export const {
+    useGetBlogsQuery,
+    useGetBlogQuery, 
+    useAddNewBlogMutation, 
+    useEditBlogMutation, 
+    useDeleteBlogMutation
+} = apiSlice;

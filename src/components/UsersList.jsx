@@ -1,36 +1,39 @@
 import {useState} from "react";
 
-import {useSelector, useDispatch} from "react-redux";
-import {selectAllUsers } from "../reducers/userSlice";
+import {useSelector} from "react-redux";
+import {selectAllUsers, useAddNewUserMutation, useDeleteUserMutation } from "../reducers/userSlice";
 import { Link } from "react-router-dom";
 import { nanoid } from "@reduxjs/toolkit";
 
 const UsersList = () => {
     const [user, setUser] = useState("");
 
-    // const dispatch = useDispatch();
 
 const users = useSelector(selectAllUsers);
+
+const [addNewUser, {isLoading}] = useAddNewUserMutation();
+const [deleteUser] = useDeleteUserMutation();
 
 const onUserChange = e => setUser(e.target.value);
 
 const canSave = Boolean(user);
-// const handleSubmitForm = () => {
-//     if(canSave){
-//         dispatch(addNewUser({id: nanoid(), fullname: user}));
-//         setUser("");
-//     }
-// }
 
-// const handleDelete = userId => {
-//     dispatch(deleteApiUser(userId));
-// }
+const handleSubmitForm = async () => {
+    if(canSave){
+        await addNewUser({id: nanoid(), fullname: user});
+        setUser("");
+    }
+}
+
+const handleDelete = async userId => {
+   await deleteUser(userId);
+}
 
 const renderedUsers = users.map(user => (
     <li key={user.id}>
         <Link to={`/users/${user.id}`}>{user.fullname}</Link>
         &nbsp;
-        {/* <Link onClick={() => handleDelete(user.id)} style={{marginRight: "10px", color: "tomato"}}>&otimes;</Link> */}
+        <Link onClick={() => handleDelete(user.id)} style={{marginRight: "10px", color: "tomato"}}>&otimes;</Link>
     </li>
 ));
 
@@ -43,7 +46,7 @@ const renderedUsers = users.map(user => (
                     <input type="text" id="user" name="user" value={user} onChange={onUserChange} />
 
                     <button type="button" 
-                    // onClick={handleSubmitForm} 
+                    onClick={handleSubmitForm} 
                     disabled={!canSave}>
                         ساخت نویسنده جدید
                     </button>
